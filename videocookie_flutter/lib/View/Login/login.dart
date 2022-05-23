@@ -108,8 +108,13 @@ class AuthPage extends StatelessWidget {
           elevation: 8,
           onPressed: () async {
             if (_formKey.currentState!.validate()) {
+              // print('이메일  :  ' + _emailController.text.toString());
+              // print('비밀번호  :  ' + _passwordController.text.toString());
+              // var path = '/api/user/localLogin';
+              // var url = Uri.parse('http://localhost:8080/api/user/localLogin');
               var formMap = {'email': _emailController.text.toString(), 'password': _passwordController.text.toString()};
-              String url = 'http://localhost:8080/api/user/localLogin';
+
+              String url = 'http://localhost:8080/api/user/flutter/login';
               http.Response response = await http.post(Uri.parse(url),
                 headers: <String, String> {
                   'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8',
@@ -118,8 +123,9 @@ class AuthPage extends StatelessWidget {
               );
               final decodeData = utf8.decode(response.bodyBytes);
               final data = jsonDecode(decodeData);
-              print(data);
-
+              // print(data['code']);
+              // print(data['message']);
+              // print(data['data']);
             } else {
             }
           },
