@@ -1,5 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:videocookie_flutter/helper/login_background.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert' as convert;
 
 class AuthPage extends StatelessWidget {
   AuthPage({Key? key}) : super(key: key);
@@ -102,10 +106,20 @@ class AuthPage extends StatelessWidget {
         height: 50,
         child: MaterialButton(
           elevation: 8,
-          onPressed: () {
+          onPressed: () async {
             if (_formKey.currentState!.validate()) {
-              print('이메일  :  ' + _emailController.text.toString());
-              print('비밀번호  :  ' + _passwordController.text.toString());
+              var formMap = {'email': _emailController.text.toString(), 'password': _passwordController.text.toString()};
+              String url = 'http://localhost:8080/api/user/localLogin';
+              http.Response response = await http.post(Uri.parse(url),
+                headers: <String, String> {
+                  'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8',
+                },
+                body: formMap,
+              );
+              final decodeData = utf8.decode(response.bodyBytes);
+              final data = jsonDecode(decodeData);
+              print(data);
+
             } else {
             }
           },
