@@ -1,4 +1,10 @@
+import 'dart:collection';
+import 'dart:convert';
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert' as convert;
 
 class Home extends StatefulWidget {
   @override
@@ -6,6 +12,47 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+
+  @override
+  void initState() {
+    getItemList();
+    super.initState();
+  }
+
+  Future<void> getItemList () async {
+
+    var formMap = {
+      'mainCategory': "subtitleTemplate",
+      'categories' : '',
+      'applicationsSupported' : [1,2],
+      // 'fileTypes' : [],
+      // 'frame' : [],
+      // 'genre' : [],
+      // 'language' : [],
+      // 'platform' : [],
+      // 'situation' : [],
+      'currentPage': '0',
+      'selected' : "전체",
+      'search' : '',
+    };
+
+
+
+    String url = 'http://10.0.2.2:8080/api/user/flutter/getItemList';
+    http.Response response = await http.post(Uri.parse(url),
+      headers: <String, String> {
+        'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8',
+      },
+      // body: jsonEncode({'mainCategory': "subtitleTemplate", 'selected' : "전체"}),
+      body:  formMap
+    );
+    final decodeData = utf8.decode(response.bodyBytes);
+    final data = jsonDecode(decodeData);
+    // print(data['code']);
+    // print(data['message']);
+    print(data['data']);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(

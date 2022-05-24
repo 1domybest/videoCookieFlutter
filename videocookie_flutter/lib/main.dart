@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-
 import 'View/Login/login.dart';
 import './screens/cart.dart';
 import './screens/home.dart';
 import './screens/settings.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert' as convert;
 
 void main() {
   runApp(
@@ -20,7 +21,7 @@ void main() {
         )
       ),
       // home: List(),
-      home: AuthPage(),
+      home: List(),
       debugShowCheckedModeBanner: false,
     )
   );
