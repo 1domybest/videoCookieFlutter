@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 
 import 'View/Login/login.dart';
+import './screens/cart.dart';
+import './screens/home.dart';
+import './screens/settings.dart';
 
 void main() {
   runApp(
@@ -16,7 +19,8 @@ void main() {
           bodyText2: TextStyle(color: Colors.red)
         )
       ),
-      home: List(),
+      // home: List(),
+      home: AuthPage(),
       debugShowCheckedModeBanner: false,
     )
   );
@@ -35,8 +39,51 @@ class MyApp extends StatelessWidget {
 }
 
 
-class List extends StatelessWidget {
+class List extends StatefulWidget {
   const List({Key? key}) : super(key: key);
+
+
+  @override
+  State<List> createState() => _ListState();
+}
+
+class _ListState extends State<List> {
+
+  int bottomSelectedIndex = 0;
+
+  PageController pageController = PageController(
+    initialPage: 0,
+    keepPage: true,
+  );
+
+  Widget buildPageView() {
+    return PageView(
+      controller: pageController,
+      onPageChanged: (index) {
+        pageChanged(index);
+      },
+      children: <Widget>[
+        Home(),
+        Cart(),
+        Settings(),
+      ],
+    );
+  }
+
+  void bottomTapped(int index) {
+    setState(() {
+      bottomSelectedIndex = index;
+      pageController.animateToPage(index, duration: Duration(milliseconds: 500), curve: Curves.ease);
+    });
+  }
+
+
+  void pageChanged(int index) {
+    setState(() {
+      bottomSelectedIndex = index;
+      pageController.animateToPage(index, duration: Duration(milliseconds: 500), curve: Curves.ease);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -67,7 +114,30 @@ class List extends StatelessWidget {
           ],
         ),
       ),
-      body: Text('ㅎㅇ'),
+      body: buildPageView(),
+      bottomNavigationBar:  BottomNavigationBar(
+        showSelectedLabels: false,
+        showUnselectedLabels: false,
+        currentIndex: bottomSelectedIndex,
+        onTap: (i) {
+          setState(() {
+            bottomSelectedIndex = i;
+            bottomTapped(i);
+          });
+          },
+        items: [
+          BottomNavigationBarItem(icon: Icon(Icons.home),label: '홈', activeIcon: Icon(Icons.home,color: Color.fromRGBO(130, 66, 34, 1),)),
+          BottomNavigationBarItem(icon: Icon(Icons.shopping_cart),label: '장바구니', activeIcon: Icon(Icons.shopping_cart,color: Color.fromRGBO(130, 66, 34, 1),)),
+          BottomNavigationBarItem(icon: Icon(Icons.settings),label: '설정', activeIcon: Icon(Icons.settings,color: Color.fromRGBO(130, 66, 34, 1),)),
+        ],
+      ),
+
     );
+
   }
 }
+
+
+
+
+
