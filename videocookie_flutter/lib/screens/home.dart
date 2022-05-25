@@ -1,11 +1,12 @@
 import 'dart:collection';
 import 'dart:convert';
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert' as convert;
-
+import 'package:video_player/video_player.dart';
+import 'package:video_thumbnail/video_thumbnail.dart';
+import 'package:path_provider/path_provider.dart';
 class Home extends StatefulWidget {
   @override
   _HomeState createState() => _HomeState();
@@ -48,11 +49,11 @@ class Item {
   final String productType;
   final String eventEndDate;
   final String eventStartDate;
-  final String discountRate;
-  final String categories;
+  final int discountRate;
+  final int categories;
   final String itemType;
-  final String sizeX;
-  final String sizeY;
+  final int sizeX;
+  final int sizeY;
 
   const Item(
       {required this.itemId, required this.filePath, required this.price, required this.orderCnt, required this.thumbnail, required this.mainCategory, required this.title, required this.zipFile, required this.sampleFile, required this.isAccept, required this.regDate, required this.author, required this.authorId, required this.productType, required this.eventEndDate, required this.eventStartDate, required this.discountRate, required this.categories, required this.itemType, required this.sizeX, required this.sizeY});
@@ -73,8 +74,8 @@ class Item {
         author : json['author'],
         authorId : json['authorId'],
         productType : json['productType'],
-        eventEndDate : json['eventEndDate'],
-        eventStartDate : json['eventStartDate'],
+        eventEndDate : json['eventEndDate'] ?? "",
+        eventStartDate : json['eventStartDate']?? "",
         discountRate : json['discountRate'],
         categories : json['categories'],
         itemType : json['itemType'],
@@ -119,6 +120,8 @@ class SearchType {
 }
 
 class _HomeState extends State<Home> {
+  var itemList = [];
+
   @override
   void initState() {
     SearchType searchType = new SearchType(mainCategory: "subtitleTemplate", categories: [], applicationsSupported: [], fileTypes: [], frame: [], genre: [], language: [], platform: [], currentPage: 0, search: "", situation: [], selected: '전체');
@@ -126,14 +129,36 @@ class _HomeState extends State<Home> {
 
     post(url,searchType.getSearchType()).then((String res) {
       final data = jsonDecode(res);
-      print(data['data']['content'][0]);
-
       data['data']['content'].forEach((item) {
-        print(Item.fromJson(item));
+        ImageFormat _format = ImageFormat.JPEG;
+        int _quality = 10;
+        int _size = 0;
+        getThumbnail(_format,_quality,_size,item['sampleFile'].toString()).then((res) async {
+          final file =  File(res!);
+          setState(() {
+            item['img'] = file;
+          });
+          itemList.add(item);
+        });
       });
-      // List<Map<String, dynamic>> list = data.data.content;
     });
     super.initState();
+  }
+
+  Future<String?> getThumbnail (ImageFormat _format, int _quality, int _size, String sampleFile) async {
+    final thumbnail = await VideoThumbnail.thumbnailFile(
+      video: sampleFile,
+      thumbnailPath: (await getTemporaryDirectory()).path,
+      imageFormat: ImageFormat.JPEG,
+      maxWidth: 0,
+      quality: 100,
+    );
+    return thumbnail;
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   Future<String> post(String url, Map jsonMap) async {
@@ -159,46 +184,12 @@ class _HomeState extends State<Home> {
     httpClient.close();
 
     final data = jsonDecode(reply);
-    print(data);
     return reply;
-  }
-
-  Future<void> getItemList () async {
-
-    var formMap = {
-      'mainCategory': "subtitleTemplate",
-      'categories' : '',
-      'applicationsSupported' : [1,2],
-      // 'fileTypes' : [],
-      // 'frame' : [],
-      // 'genre' : [],
-      // 'language' : [],
-      // 'platform' : [],
-      // 'situation' : [],
-      'currentPage': '0',
-      'selected' : "전체",
-      'search' : '',
-    };
-
-
-
-    String url = 'http://10.0.2.2:8080/api/user/flutter/getItemList';
-    http.Response response = await http.post(Uri.parse(url),
-      headers: <String, String> {
-        'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8',
-      },
-      // body: jsonEncode({'mainCategory': "subtitleTemplate", 'selected' : "전체"}),
-      body:  formMap
-    );
-    final decodeData = utf8.decode(response.bodyBytes);
-    final data = jsonDecode(decodeData);
-    // print(data['code']);
-    // print(data['message']);
-    print(data['data']);
   }
 
   @override
   Widget build(BuildContext context) {
+
     return Column(
       children: [
         Container(
@@ -234,21 +225,21 @@ class _HomeState extends State<Home> {
             ],
           ),
         ),
-        Expanded(child: ItemList())
+        Expanded(child: ItemList(itemList))
       ],
     );
   }
 }
 
 
-Widget ItemList () {
-  return ListView.builder(itemCount: 3, itemBuilder: (c, i) {
+Widget ItemList (List<dynamic> list) {
+  return ListView.builder(itemCount: list.length, itemBuilder: (c, i) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Image.network('https://codingapple1.github.io/app/car0.png'),
-        Text('좋아요 100'),
-        Text('글쓴이'),
+        Image.file(list[i]['img'],),
+        Text(list[i]['title']),
+        Text(list[i]['author']),
         Text('내용'),
       ],
     );
