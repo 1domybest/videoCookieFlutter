@@ -238,9 +238,34 @@ Widget ItemList (List<dynamic> list) {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Image.file(list[i]['img'],),
-        Text(list[i]['title']),
-        Text(list[i]['author']),
-        Text('내용'),
+        Column(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            Container(
+              padding: EdgeInsets.only(left: 30, top: 15, bottom: 15),
+              width: double.infinity,
+              child:Text(list[i]['title'], style: TextStyle(fontSize: 20, color: Colors.black87, fontWeight: FontWeight.w900),),
+            ),
+            Container(
+              width: double.infinity,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Text(list[i]['author']),
+                  Icon(Icons.shopping_bag)
+                ],
+              ),
+            ),
+            Container(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Text(list[i]['price'].toString() + '원'),
+                ],
+              ),
+            ),
+          ],
+        ),
       ],
     );
   });
